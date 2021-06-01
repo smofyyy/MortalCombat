@@ -1,2 +1,1 @@
-const firstName = 'Sonya';
-console.log(typeof(firstName));
+console.log('Hello world!')
