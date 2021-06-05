@@ -1,4 +1,9 @@
+const $arenas = document.querySelector(".arenas");
+const $root = document.querySelector(".root");
+const $randomButton = document.querySelector(".button");
+
 const firstCharacter = {
+  player: 1,
   name: "Sub-Zero",
   hp: 100,
   img: "http://reactmarathon-api.herokuapp.com/assets/subzero.gif",
@@ -8,6 +13,7 @@ const firstCharacter = {
   },
 };
 const secondCharacter = {
+  player: 2,
   name: "Scorpion",
   hp: 100,
   img: "http://reactmarathon-api.herokuapp.com/assets/scorpion.gif",
@@ -17,49 +23,73 @@ const secondCharacter = {
   },
 };
 
-function createPlayer(playerClass, character) {
-  const $player = document.createElement("div");
-  $player.classList.add(playerClass);
+function createElement(tag, className) {
+  const $tag = document.createElement(tag);
+  if (className) {
+    $tag.classList.add(className);
+  }
+  return $tag;
+}
 
-  const $root = document.querySelector(".root");
-  $root.appendChild($player);
+function createPlayer(character) {
+  const $player = createElement("div", `player${character.player}`);
+  const $progressbar = createElement("div", "progressbar");
+  const $character = createElement("div", "character");
+  const $life = createElement("div", "life");
+  const $name = createElement("div", "name");
+  const $img = createElement("img");
 
-  const $progressbar = document.createElement("div");
-  $progressbar.classList.add("progressbar");
-
-  const $character = document.createElement("div");
-  $character.classList.add("character");
-
-  $player.appendChild($progressbar);
-  $player.appendChild($character);
-
-  const $life = document.createElement("div");
-  $life.classList.add("life");
   $life.style.width = `${character.hp}%`;
-
-  const $name = document.createElement("div");
-  $name.classList.add("name");
   $name.innerText = character.name;
+  $img.src = character.img;
 
   $progressbar.appendChild($life);
   $progressbar.appendChild($name);
 
-  const $img = document.createElement("img");
-  $img.src = character.img;
+  $player.appendChild($progressbar);
+  $player.appendChild($character);
 
   $character.appendChild($img);
 
-  const $arenas = document.querySelector(".arenas");
-  $arenas.appendChild($player);
+  $root.appendChild($player);
+
+  return $player;
 }
 
-createPlayer('player1', firstCharacter);
-createPlayer('player2', secondCharacter);
+function randomizeHp() {
+  const randomHp = Math.ceil(Math.random() * 20);
+  return randomHp;
+}
 
-// Я не очень понял как правильно следовало бы расставлять переменные в функции, а точнее в каком порядке?
-// Я когда объявлял переменную, следом для нее создавал div и в принципе с ней работал, потом же приступал к следующей,
-// но мне кажется если сначала вывести все переменные, потом выводить присвоение классов для каждого созданного div'а и так далее, 
-// то так удобнее читать, но я не уверен.
+function changeHp(character) {
+  const $playerLife = document.querySelector(
+    `.player${character.player} .life`
+  );
+  if (character.hp > 0) {
+    character.hp -= randomizeHp();
+    $playerLife.style.width = character.hp + "%";
+  }
 
-// Собственно сам вопрос, как и в каком порядке создавать функцию? Правильный ли у меня стиль написания? Если нет, то как правильнее?
+  if (character.hp <= 0) {
+    $playerLife.style.width = 0 + "%";
+  }
 
+  if (character.hp <= 0) {
+    $arenas.appendChild(playerWin(character.name));
+    $randomButton.disabled = true;
+  }
+}
+
+function playerWin(name) {
+  const $winTitle = createElement("div", "winTitle");
+  $winTitle.innerText = `${name} win`;
+  return $winTitle;
+}
+
+$randomButton.addEventListener("click", function () {
+  changeHp(firstCharacter);
+  changeHp(secondCharacter);
+});
+
+$arenas.appendChild(createPlayer(firstCharacter));
+$arenas.appendChild(createPlayer(secondCharacter));
